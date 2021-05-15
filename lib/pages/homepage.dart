@@ -11,6 +11,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  bool isCheckin = false;
 
   var locationMessage = '';
   var locationMessage1 = '';
@@ -137,12 +138,20 @@ class _HomePageState extends State<HomePage> {
                 style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold,)),
 
             // button for taking the location
-            MaterialButton(
+            !isCheckin?MaterialButton(
               color: Colors.white,
               onPressed: () {
                 getCurrentLocation();
+                isCheckin = true;
               },
-              child: Text("Get User Location"),
+              child: Text("Check In"),
+            ): MaterialButton(
+              color: Colors.white,
+              onPressed: () {
+                getCurrentLocation1();
+                isCheckin = false;
+              },
+              child: Text("Check Out "),
             ),
 
             SizedBox(
@@ -161,13 +170,7 @@ class _HomePageState extends State<HomePage> {
               fontSize: 20, fontWeight: FontWeight.bold,)),
             Text(CheckOuttimeMessage),
             Text(checkOutAddress),
-            MaterialButton(
-              color: Colors.white,
-              onPressed: () {
-                getCurrentLocation1();
-              },
-              child: Text("Get User Location"),
-            ),
+
 
             // FlatButton(
             //   color: Colors.white,
