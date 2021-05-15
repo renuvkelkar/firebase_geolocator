@@ -17,19 +17,21 @@ class _HomePageState extends State<HomePage> {
   var CheckOuttimeMessage = '';
   var checkinAddress = '';
   var checkOutAddress = '';
+  var checkinDateMeg = '';
 
   var CheckintimeMessage = '';
   String latitude;
   String longitude;
   Position _position;
   Address _address;
+  Future<Address>convertCoordinatesToAddress(Coordinates coordinates)async {
+    var addresses = await Geocoder.local.findAddressesFromCoordinates(
+        coordinates);
+    return addresses.first;
+  }
 
   void getCurrentLocation() async {
-    Future<Address>convertCoordinatesToAddress(Coordinates coordinates)async {
-      var addresses = await Geocoder.local.findAddressesFromCoordinates(
-          coordinates);
-      return addresses.first;
-    }
+
     String now = DateFormat("dd-MM-yyyy hh:mm:ss").format(DateTime.now());
     var position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high);
@@ -46,9 +48,14 @@ class _HomePageState extends State<HomePage> {
     convertCoordinatesToAddress(coordinates).then((value)=>_address=value);
 
     setState(() {
+      checkinDateMeg = "$checkinDate";
       locationMessage = "Latitude: $lat and Longitude: $long";
-      CheckintimeMessage = "checkin time: $checkinTime ";
-      checkinAddress = "Address from Coordinates1 : ${_address.addressLine}";
+
+      checkinAddress = "Address from Coordinates1 : ${_address?.addressLine ?? '-'}";
+      CheckintimeMessage = "$checkinTime ";
+
+      Text(DateFormat("dd/MM/yyyy",).format(DateTime.now()),
+          style: TextStyle(fontSize: 15,));
     });
   }
   void getCurrentLocation1() async {
@@ -64,9 +71,12 @@ class _HomePageState extends State<HomePage> {
     // passing this to latitude and longitude strings
     latitude = "$lat";
     longitude = "$long";
+    final coordinates=new Coordinates(position.latitude, position.longitude);
+    convertCoordinatesToAddress(coordinates).then((value)=>_address=value);
 
     setState(() {
       locationMessage1 = "Latitude: $lat and Longitude: $long";
+      checkOutAddress = "Address from Coordinates1 : ${_address?.addressLine ?? '-'}";
       CheckOuttimeMessage = "CheckOut time: $checkOutTime ";
     });
   }
@@ -111,6 +121,12 @@ class _HomePageState extends State<HomePage> {
             SizedBox(
               height: 05.0,
             ),
+            Text("Checkin Date", style: TextStyle(
+              fontSize: 20, fontWeight: FontWeight.bold,)),
+            Text(checkinDateMeg),
+            SizedBox(
+              height: 05.0,
+            ),
             Text("Checkin time", style: TextStyle(
               fontSize: 20, fontWeight: FontWeight.bold,)),
             Text(CheckintimeMessage),
@@ -144,6 +160,7 @@ class _HomePageState extends State<HomePage> {
             Text("Checkout time", style: TextStyle(
               fontSize: 20, fontWeight: FontWeight.bold,)),
             Text(CheckOuttimeMessage),
+            Text(checkOutAddress),
             MaterialButton(
               color: Colors.white,
               onPressed: () {
