@@ -14,7 +14,7 @@ class _HomePageState extends State<HomePage> {
   bool isCheckin = false;
 
   var locationMessage = '';
-  var locationMessage1 = '';
+  var checkputLocationMessage = '';
   var CheckOuttimeMessage = '';
   var checkinAddress = '';
   var checkOutAddress = '';
@@ -49,7 +49,7 @@ class _HomePageState extends State<HomePage> {
     convertCoordinatesToAddress(coordinates).then((value)=>_address=value);
 
     setState(() {
-      checkinDateMeg = "$checkinDate";
+      checkinDateMeg = DateFormat("dd/MM/yyyy",).format(DateTime.now());
       locationMessage = "Latitude: $lat and Longitude: $long";
 
       checkinAddress = "Address from Coordinates1 : ${_address?.addressLine ?? '-'}";
@@ -75,17 +75,75 @@ class _HomePageState extends State<HomePage> {
     final coordinates=new Coordinates(position.latitude, position.longitude);
     convertCoordinatesToAddress(coordinates).then((value)=>_address=value);
 
+
+  }
+
+  Future<Coordinates> getCoordinates() async{
+    var position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high);
+      return Coordinates(position.latitude, position.longitude);
+  }
+
+  bool isProcessing = false;
+
+
+  doCheckIn() async{
     setState(() {
-      locationMessage1 = "Latitude: $lat and Longitude: $long";
-      checkOutAddress = "Address from Coordinates1 : ${_address?.addressLine ?? '-'}";
-      CheckOuttimeMessage = "CheckOut time: $checkOutTime ";
+      isProcessing = true;
+    });
+    try {
+      print("Getting Locations");
+      Coordinates coordinates = await getCoordinates();
+      Address address = await convertCoordinatesToAddress(coordinates);
+      var checkinDate = DateFormat("dd/MM/yyyy",).format(DateTime.now());
+      var checkInTime =  DateFormat("hh:mm").format(DateTime.now());
+      setState(() {
+        locationMessage =
+        "Latitude: ${coordinates.latitude} and Longitude: ${coordinates
+            .longitude}";
+        checkinAddress =
+        "Address from Coordinates1 : ${address?.addressLine ?? '-'}";
+        CheckintimeMessage = "check in time: $checkInTime ";
+        checkinDateMeg = "check in time: $checkinDate ";
+        isCheckin = true;
+        statusMessage = "you ..... checked in";
+        isProcessing = false;
+      });
+    }catch(e){
+    print(e);
+    }
+
+  }
+
+
+  doCheckOut() async{
+    statusMessage = "";
+    Coordinates coordinates = await getCoordinates();
+    Address address = await convertCoordinatesToAddress(coordinates);
+    var checkInTime =  DateFormat("hh:mm").format(DateTime.now());
+    //TODO: CHECKOUT LOGIC
+    setState(() {
+      checkputLocationMessage =
+      "Latitude: ${coordinates.latitude} and Longitude: ${coordinates
+          .longitude}";
+      checkOutAddress =
+      "Address from Coordinates1 : ${address?.addressLine ?? '-'}";
+
+      CheckOuttimeMessage = "check in time: $checkInTime ";
+      statusMessage="Checked Out";
+      isProcessing = false;
+      isCheckin = false;
     });
   }
+
+
+  String statusMessage = "You are currently Checked In";
+
+
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.blue,
       appBar: AppBar(
         title: Text("Firebase Geo locator"),
       ),
@@ -138,18 +196,19 @@ class _HomePageState extends State<HomePage> {
                 style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold,)),
 
             // button for taking the location
-            !isCheckin?MaterialButton(
+
+           isProcessing?CircularProgressIndicator():
+
+             !isCheckin?MaterialButton(
               color: Colors.white,
               onPressed: () {
-                getCurrentLocation();
-                isCheckin = true;
+                doCheckIn();
               },
               child: Text("Check In"),
             ): MaterialButton(
               color: Colors.white,
               onPressed: () {
-                getCurrentLocation1();
-                isCheckin = false;
+                doCheckOut();
               },
               child: Text("Check Out "),
             ),
@@ -158,7 +217,7 @@ class _HomePageState extends State<HomePage> {
               height: 30.0,
             ),
             Text(
-              locationMessage1,
+              checkputLocationMessage,
               style: TextStyle(
                 color: Colors.white,
               ),
