@@ -19,8 +19,11 @@ class _HomePageState extends State<HomePage> {
   var checkinAddress = '';
   var checkOutAddress = '';
   var checkinDateMeg = '';
+  var totalTimeMsg ='';
 
   var CheckintimeMessage = '';
+  String ckin;
+  String ckout;
   String latitude;
   String longitude;
   Position _position;
@@ -98,12 +101,14 @@ class _HomePageState extends State<HomePage> {
       var checkinDate = DateFormat("dd/MM/yyyy",).format(DateTime.now());
       var checkInTime =  DateFormat("hh:mm").format(DateTime.now());
       setState(() {
+        ckin = checkInTime.toString();
         locationMessage =
         "Latitude: ${coordinates.latitude} and Longitude: ${coordinates
             .longitude}";
         checkinAddress =
         "Address from Coordinates1 : ${address?.addressLine ?? '-'}";
         CheckintimeMessage = "check in time: $checkInTime ";
+
         checkinDateMeg = "check in time: $checkinDate ";
         isCheckin = true;
         statusMessage = "you ..... checked in";
@@ -117,17 +122,29 @@ class _HomePageState extends State<HomePage> {
 
 
   doCheckOut() async{
+
+
     statusMessage = "";
     Coordinates coordinates = await getCoordinates();
     Address address = await convertCoordinatesToAddress(coordinates);
     var checkInTime =  DateFormat("hh:mm").format(DateTime.now());
+    ckout = checkInTime.toString();
+    var total;
+
+    var format = DateFormat("HH:mm");
+    var one = format.parse(ckin);
+    var two = format.parse(ckout);
+
     //TODO: CHECKOUT LOGIC
     setState(() {
+      print("${two.difference(one).inMinutes}"); // prints 7:40
+
       checkputLocationMessage =
       "Latitude: ${coordinates.latitude} and Longitude: ${coordinates
           .longitude}";
       checkOutAddress =
       "Address from Coordinates1 : ${address?.addressLine ?? '-'}";
+      totalTimeMsg = "${two.difference(one).inMinutes}";
 
       CheckOuttimeMessage = "check in time: $checkInTime ";
       statusMessage="Checked Out";
@@ -229,6 +246,13 @@ class _HomePageState extends State<HomePage> {
               fontSize: 20, fontWeight: FontWeight.bold,)),
             Text(CheckOuttimeMessage),
             Text(checkOutAddress),
+            SizedBox(
+              height: 05.0,
+            ),
+            Text("total time", style: TextStyle(
+              fontSize: 20, fontWeight: FontWeight.bold,)),
+
+            Text(totalTimeMsg)
 
 
             // FlatButton(
